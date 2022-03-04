@@ -37,7 +37,7 @@ Plot the outcome variable against the treatment variable. Make sure you label yo
 
 plot(D,Y, xlab="Treatment", ylab="Outcome Variable")
 
-# Your code here
+
 STEP 4
 Are the variables V1, V2, V3, and V4 balanced across the treatment and control groups? You can use any R function from any package to check this (for instance, you can check the cobalt package). Make sure you check all variables.
 Note: This is optional but you can use the gridExtra package and its grid.arrange() function to put all the 4 graphs in one 2 x 2 graph. Read more about the package and how to use it here: https://cran.r-project.org/web/packages/egg/vignettes/Ecosystem.html. Set nrow = 2.
@@ -71,7 +71,7 @@ grid.arrange(V1.plot, V2.plot, V3.plot, V4.plot, nrow = 2)
 print(df.means)
 STEP 5
 Write code that would simply calculate the Prima Facie treatment effect in the data above. What’s the Prima Facie treatment effect? Note that the outcome variable is binary.
-Prima facie is the first impression that we get by looking at the model. We look at the causal relationship and notice a difference between the treatment and control groups, making certain assumptions about the causal inference. Such assumption is accepted as correct until we prove it wrong. And while the first impression of a treatment effect might be valid, we should not rely on prima facie effect since we do not know the state of the variables before the experiment and cannot properly access the treatment effect in this case. 
+
 *code for the Prima Facie will be here soon*
 df.treat <- subset(df$Y, df$D == 1)
 df.control <- subset(df$Y, df$D == 0)
@@ -79,7 +79,7 @@ primafacie <- mean(df.treat) - mean(df.control)
 print(primafacie)
 STEP 6
 Explain why the Prima Facie effect is not the true average causal effect from Step 2.
-Prima Facie effect provided us with an estimated treatment effect, which appeared to be lower than the actual treatment effect (0.3 and 0.8, respectively). The mean variables tend to be higher across the treatment group, which leads to the imbalance between the treatment and control groups. Thus, we could use Matching to pair up similar treatment and control variables, which will lead to the more accurate treatment effect results.
+
 STEP 7
 We can use matching to create a better balance of the covariates. Use a propensity score model that includes all the variables V1, V2, V3, and V4.
 df2 = data.frame(V1, V2, V3, V4, D, Y)
@@ -144,8 +144,7 @@ library(cobalt)
 love.plot(x=reg, formula = (nowtot ~ hasgirls + Dems + Repubs + Christian + age + srvlng + demvote), data = daughters, method = "weighting", estimand = "ATT", stars ="std")
  
 STEP 2
-Then, do genetic matching. Use the same variables as in the regression above. Make sure to set estimand = "ATT". What’s your treatment effect?
-Note: For replicability purposes, we need to choose a seed for the GenMatch() function. However, setting seed for GenMatch() is different. The usual practice of typing set.seed(some number) before the GenMatch line doesn’t ensure stochastic stability. To set seeds for GenMatch, you have to run GenMatch() including instructions for genoud within GenMatch(), e.g.: GenMatch(Tr, X, unif.seed = 123, int.seed = 92485...). You can find info on these .seed elements in the documentation for genoud(). The special .seed elements should only be present in the GenMatch() line, not elsewhere (because nothing besides GenMatch() runs genoud.
+
 Note: When you use the GenMatch() function, wrap everything inside the following function invisible(capture.output()). This will reduce the unnecessary output produced from the GenMatch() function. For instance, you can say: invisible(capture.output(genout_daughters <- GenMatch(...)))
 install.packages("Matching")
 library(rgenoud)
@@ -177,8 +176,8 @@ mout$est
  
 STEP 3
 Summarize (in 5-15 sentences) the genetic matching procedure and results, including what you matched on, what you balanced on, and what your balance results were. Provide output for MatchBalance() in the body of your submission.
-We are using scale-based matching for each variable. To do that, we use Genetic Matching, which searches for the most effective combination of the scales to match the treatment and control groups to validate the results of the treatment. GenMatch does so by keeping the scales that result in a good balance between the treatment and control groups for each variable. Those “good” scales proceed to the next generation, and the selection process continues for the selected number of generations (50, in this case). After that, the function chooses the optimal scale that best matches the treatment group with the control.
-Patrycja’s
+
+
 p value before: $p.value [1] 0.3557053
 p value after: $p.value [1] 0.6810706
  - improvement
@@ -197,12 +196,7 @@ Is your treatment effect different from the one reported before matching? By how
 The post-matching treatment effect (0.83) is different from the pre-matching treatment effect (-0.45). This is due to the fact that we reduced the bias Genetic Matching. It allowed us to get a better balance between the covariates of the treatment and the control groups and made the causal inference more precise. Following the discussion in the paper, after matching, we confirm that the observed politicians are 0.83 times more supportive of women on every additional girl child.
 
 STEP 5
-Change the parameters in your genetic matching algorithm to improve the balance of the covariates. Consider rerunning with M = 2 or 3 or more. Consider increasing other parameters in the GenMatch() function such as the number of generations and population size, caliper, etc. Try 10 different ways but don’t report the results of the genetic matching weights or the balance in this document. Only report the treatment effect of your top 3 matches. For instance, run the Match() function three times for your top 3 genout objects. Make sure the summary reports the treatment effect estimate, the standard error, and the confidence interval. Do you see a large variation in your treatment effect between your top 3 models?
-Note: For replicability purposes, we need to choose a seed for the GenMatch() function. However, setting seed for GenMatch() is different. The usual practice of typing set.seed(123) before the GenMatch line doesn’t ensure stochastic stability. To set seeds for GenMatch, you have to run GenMatch() including instructions for genoud within GenMatch(), e.g.: GenMatch(Tr, X, unif.seed = 123, int.seed = 92485...). You can find info on these .seed elements in the documentation for genoud(). The special .seed elements should only be present in the GenMatch() line, not elsewhere (because nothing besides GenMatch() runs genoud.
-Note: When you use the GenMatch() function, wrap everything inside the following function invisible(capture.output()). This will reduce the unnecessary output produced with the GenMatch() function. For instance, you can say: invisible(capture.output(genout_daughters <- GenMatch(...)))
-Note: In the matching assignment, you may find that the Genetic Matching step takes a while, e.g., hours. If you have to reduce pop.size to e.g., 10 or 16 to ensure it stops after only an hour or two, that’s fine. Running your computer for an hour or two is a good thing. Running it for a full day or more is unnecessary overkill (and if this is your situation, change hyperparameters like pop.size to reduce run-time). For example, we suggest you modify the pop.size (e.g., you can set it to 5!), max.generations (set it to 2!), and wait.generations (set it to 1!) and that should expedite things.
-Note: Can you set a caliper for one confounding variable, and not others (e.g., only set a caliper for “age”)? No and yes. No, strictly speaking you can’t. But yes, practically speaking you can, if you set other calipers (for the other confounders) that are so wide as to not induce any constraints. E.g., in GenMatch, and Match, you could set caliper = c(1e16, 1e16, 0.5, 1e16) and this would induce a certain meaningful caliper for the third confounder in X, without constraining the other confounders (because 1e16 implies a caliper that is so enormously wide that it does not, in practical terms, serve as a caliper at all).
-# Your code here
+
 #version 1
 invisible(capture.output(genout_1 <- GenMatch(Tr=Tr, X=X, estimand = "ATT", M=2, pop.size = 60, max.generations = 15, wait.generations = 5, unif.seed = 333, int.seed = 3333)))
 m.out_1<- Match(Y = Y, Tr=Tr, X=X, M=2, Weight.matrix = genout_1)
@@ -225,9 +219,8 @@ m.out_3<- Match(Y = Y, Tr=Tr, X=X, M=4, Weight.matrix = genout_3)
 m.out_3$est
 Although the three different models show variability in outcomes, they are pretty similar and do not deviate much from zero, which means that, given our CI’s from step 1, the null hypothesis (no significant difference) should most likely be accepted.
 STEP 6
-Repeat everything you’ve done for Steps 1-2, including the regression, genetic algorithm, code and estimating the treatment effect EXCEPT this time change the definition of treatment to cover 2 girls or more, and change the definition of control to cover 2 boys or more. Exclude all observations that don’t meet these requirements. Be sure to explain (in a sentence or two) what you’re doing with your new treatment and control definitions. Do your new definitions change anything?
-Note: Definition of the new treatment variable is as follows: Individuals in the treatment group should be having 2 or more girls and no boys, and individuals in the control group should be having 2 or more boys and no girls. What I had in mind was that such a situation increased the “dosage” of treatment vs. the “dosage” of control (and Rosenbaum alluded to this kind of observational design logic in one of the recently assigned articles). Note that you can’t have the same units in the treatment group AND the control group – we should all know by now that such a situation would be wrong.
-# Your code here
+
+
 new_daughters <- daughters %>% filter((nboys >= 2 & ngirls == 0) | (ngirls >= 2 & nboys == 0))
 head(new_daughters)
  
@@ -339,16 +332,8 @@ print(paste("The treatment effect after matching is:" , round(maha_att$est,4))) 
  
 length(maha_att$index.dropped)
 bal.tab(maha_att, formula = (smoke ~ race + age + sex + wtlbs + avedrnk2), data = brfss)
-STEP 3
-Provide a few sentences talking about the number of treated units dropped, and a few more sentences talking about the balance obtained.
-Ideas about what to talk about 
-The obtained balance after matching from bal.tab is good since the adjusted difference is low
-The closer to 0, the better, as it measure the difference between the treatment and control before and after matching
-We didn’t drop any treatment units because we used the average treatment effect for treated units. There were more controls than treated units, so all treated units got matches from control
 
 
-STEP 4
-Now, let’s do another Mahalanobis distance matching. Use all covariates in the data set in the propensity score estimation. However, this time make sure you specify estimand = "ATE" in the Match() function. What’s the treatment effect after matching?
 maha_ate <- Match(Y=Y1, Tr=Tr, X = X, Weight = 2, estimand = "ATE")
  
 summary(maha_ate)
